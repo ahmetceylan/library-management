@@ -1,2 +1,4 @@
 dist
 *.postman_collection.json
+*.md
+package*.json

@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - $PORT:$PORT
+    environment:
+      - NODE_ENV=$NODE_ENV
+      - POSTGRES_HOST=$POSTGRES_HOST
+      - POSTGRES_PORT=$POSTGRES_PORT
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_NAME=$POSTGRES_NAME
+    networks:
+      - library_case
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14
+    ports:
+      - $POSTGRES_PORT:$POSTGRES_PORT
+    environment:
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_NAME=$POSTGRES_NAME
+    networks:
+      - library_case
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+networks:
+  library_case:
+
+volumes:
+  postgres_data:
