@@ -39,12 +39,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // API Routes
-app.use('/api', routes);
+app.use(routes);
 
 // Error handler
 app.use(errorHandler);
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 const server = app.listen(port, () => winston.info(`Listening on port ${port}...`));
 
 export default server;

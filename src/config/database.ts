@@ -20,7 +20,7 @@ class DatabaseConnection {
       password: process.env.POSTGRES_PASSWORD || 'postgres',
       database: process.env.POSTGRES_NAME || 'library_management',
       synchronize: process.env.NODE_ENV === 'development', // Sadece geliştirme ortamında true olmalı
-      logging: process.env.NODE_ENV === 'development',
+      logging: false, //process.env.NODE_ENV === 'development',
       entities: [User, Book, Borrowing],
       migrations: ['src/migrations/**/*.ts'],
       subscribers: ['src/subscribers/**/*.ts']

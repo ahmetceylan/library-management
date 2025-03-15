@@ -17,4 +17,13 @@ export class UserController {
       next(error);
     }
   };
+
+  createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = await this.userService.createUser(req.body);
+      res.status(201).json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
