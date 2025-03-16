@@ -12,7 +12,12 @@
     "test": "cross-env NODE_ENV=test jest",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage",
-    "prepare": "husky"
+    "prepare": "husky",
+    "typeorm": "ts-node ./node_modules/typeorm/cli.js",
+    "migration:generate": "npm run typeorm -- migration:generate -d src/config/migration.ts",
+    "migration:run": "npm run typeorm -- migration:run -d src/config/migration.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d src/config/migration.ts",
+    "migration:show": "npm run typeorm -- migration:show -d src/config/migration.ts"
   },
   "keywords": [],
   "author": "",
