@@ -4,7 +4,15 @@ import bookRoutes from './bookRoutes';
 
 const router = Router();
 
-// Main API routes
+/**
+ * @swagger
+ * tags:
+ *   - name: Users
+ *     description: user management and borrow operations
+ *   - name: Books
+ *     description: book management
+ */
+
 router.use('/users', userRoutes);
 router.use('/books', bookRoutes);
 

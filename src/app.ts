@@ -11,6 +11,8 @@ import DatabaseConnection from './config/database';
 import Logger from './helpers/logger';
 import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './config/swagger';
 
 dotenv.config({ path: path.join(__dirname, './../.env') });
 
@@ -40,6 +42,26 @@ app.use(express.urlencoded({ extended: true }));
 
 // API Routes
 app.use(routes);
+
+// Swagger dokümantasyonunu ekle
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    swaggerOptions: {
+      docExpansion: 'none',
+      filter: true,
+      showRequestDuration: true
+    }
+  })
+);
+
+// 404 handle
+app.use((req, res, next) => {
+  res.status(404).json({ message: 'Not Found', status: 404 });
+});
 
 // Error handler
 app.use(errorHandler);

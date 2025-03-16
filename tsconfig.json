@@ -10,7 +10,8 @@
     "rootDir": "./src",
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true
   },
   "include": ["src", "src/tests"],
   "exclude": ["node_modules"]
