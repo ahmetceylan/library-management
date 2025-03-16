@@ -27,9 +27,50 @@ export class BookService {
       throw new NotFoundError(`Book with ID: ${id} not found`);
     }
 
+    // calculate avg score
+    const averageScore = await this.bookRepository.getAverageScore(id);
+
     return {
       id: book.id,
       name: book.name,
+      score: averageScore !== null ? averageScore.toFixed(2) : -1
     };
+  }
+
+  async createBook(createBookDto: CreateBookDto): Promise<void> {
+    const book = this.bookRepository.create({
+      name: createBookDto.name
+    });
+
+    await this.bookRepository.save(book);
+
+    // Postman Collection'a göre boş yanıt dönüyoruz (201 status code)
+    return;
+  }
+
+  async updateBook(id: number, updateBookDto: UpdateBookDto): Promise<void> {
+    const existingBook = await this.bookRepository.findBookById(id);
+    if (!existingBook) {
+      throw new NotFoundError(`Book with ID: ${id} not found`);
+    }
+
+    await this.bookRepository.update(id, {
+      name: updateBookDto.name
+    });
+
+    return;
+  }
+
+  async deleteBook(id: number): Promise<void> {
+    const existingBook = await this.bookRepository.findBookById(id);
+    if (!existingBook) {
+      throw new NotFoundError(`Book with ID: ${id} not found`);
+    }
+
+    const deleted = await this.bookRepository.delete(id);
+    if (!deleted) {
+      throw new Error(`Failed to delete book with ID: ${id}`);
+    }
+    return;
   }
 }

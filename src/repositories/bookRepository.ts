@@ -44,4 +44,15 @@ export class BookRepository {
     const result = await this.repository.delete(id);
     return result.affected ? result.affected > 0 : false;
   }
+  async getAverageScore(bookId: number): Promise<number | null> {
+    const result = await this.repository
+      .createQueryBuilder('book')
+      .leftJoin('book.borrowings', 'borrowing')
+      .select('AVG(borrowing.score)', 'avgScore')
+      .where('book.id = :bookId', { bookId })
+      .andWhere('borrowing.score IS NOT NULL')
+      .getRawOne();
+
+    return result?.avgScore ? parseFloat(result.avgScore) : null;
+  }
 }
