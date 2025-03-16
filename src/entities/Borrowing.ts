@@ -3,7 +3,7 @@ import { User } from './User';
 import { Book } from './Book';
 
 @Entity('borrowings')
-@Check(`"rating" >= 1 AND "rating" <= 5`)
+@Check(`"score" >= 1 AND "score" <= 10`)
 export class Borrowing {
   @PrimaryGeneratedColumn()
   id: number;
@@ -23,10 +23,7 @@ export class Borrowing {
   returnDate: Date;
 
   @Column({ nullable: true, type: 'int' })
-  rating: number;
-
-  @Column({ type: 'varchar', length: 20, default: 'borrowed' })
-  status: string;
+  score: number;
 
   @CreateDateColumn()
   created_at: Date;

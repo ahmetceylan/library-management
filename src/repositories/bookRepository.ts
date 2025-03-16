@@ -44,6 +44,7 @@ export class BookRepository {
     const result = await this.repository.delete(id);
     return result.affected ? result.affected > 0 : false;
   }
+
   async getAverageScore(bookId: number): Promise<number | null> {
     const result = await this.repository
       .createQueryBuilder('book')
@@ -54,5 +55,16 @@ export class BookRepository {
       .getRawOne();
 
     return result?.avgScore ? parseFloat(result.avgScore) : null;
+  }
+
+  async isBookBorrowed(bookId: number): Promise<boolean> {
+    const count = await this.repository
+      .createQueryBuilder('book')
+      .leftJoin('book.borrowings', 'borrowing')
+      .where('book.id = :bookId', { bookId })
+      .andWhere('borrowing.returnDate IS NULL')
+      .getCount();
+
+    return count > 0;
   }
 }
