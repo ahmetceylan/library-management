@@ -9,8 +9,7 @@ export class UserRepository {
   private repository: Repository<User>;
 
   constructor() {
-    const dataSource: DataSource = DatabaseConnection.getInstance();
-    this.repository = dataSource.getRepository(User);
+    this.repository = DatabaseConnection.getInstance().getRepository(User);
   }
 
   async findAllUsers(options: PaginationOptions): Promise<[User[], number]> {

@@ -7,13 +7,7 @@ export class Book {
   id: number;
 
   @Column({ type: 'varchar', length: 200, nullable: false })
-  title: string;
-
-  @Column({ type: 'varchar', length: 100, nullable: false })
-  author: string;
-
-  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
-  isbn: string;
+  name: string;
 
   @CreateDateColumn()
   created_at: Date;
