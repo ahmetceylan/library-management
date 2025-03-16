@@ -1,9 +1,8 @@
-import { Repository, DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../entities/User';
 import { PaginationOptions } from '../utils/pagination';
 import { Borrowing } from '../entities/Borrowing';
 import DatabaseConnection from '../config/database';
-import { UserResponseDto } from '../dtos/user/userResponseDto';
 
 export class UserRepository {
   private repository: Repository<User>;

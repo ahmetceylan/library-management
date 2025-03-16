@@ -1,4 +1,4 @@
-import { Repository, DataSource, IsNull, Not } from 'typeorm';
+import { Repository, IsNull, Not } from 'typeorm';
 import { Borrowing } from '../entities/Borrowing';
 import { PaginationOptions } from '../utils/pagination';
 import DatabaseConnection from '../config/database';

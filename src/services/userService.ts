@@ -1,9 +1,8 @@
 import { UserRepository } from '../repositories/userRepository';
-import { PaginationOptions, PaginatedResponse, createPaginatedResponse } from '../utils/pagination';
+import { PaginationOptions } from '../utils/pagination';
 import { ConflictError, NotFoundError } from '../utils/errors';
 import { CreateUserDto } from '../dtos/user/createUserDto';
 import { UserResponseDto } from '../dtos/user/userResponseDto';
-import DatabaseConnection from '../config/database';
 import { UpdateUserDto } from '../dtos/user/updateUserDto';
 
 export class UserService {
