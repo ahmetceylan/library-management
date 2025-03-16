@@ -10,6 +10,17 @@ export class UserRepository {
     const dataSource: DataSource = DatabaseConnection.getInstance();
     this.repository = dataSource.getRepository(User);
   }
+
+  async findAllUsers(options: PaginationOptions): Promise<[User[], number]> {
+    return this.repository.findAndCount({
+      skip: options.skip,
+      take: options.limit,
+      order: {
+        created_at: 'DESC'
+      }
+    });
+  }
+
   async findUserById(id: number): Promise<User | null> {
     return this.repository.findOne({
       where: { id },

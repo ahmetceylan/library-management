@@ -3,7 +3,6 @@ import { PaginationOptions, PaginatedResponse, createPaginatedResponse } from '.
 import { NotFoundError, ConflictError } from '../utils/errors';
 import { CreateUserDto } from '../dtos/user/createUserDto';
 import { UserResponseDto } from '../dtos/user/userResponseDto';
-import DatabaseConnection from '../config/database';
 
 export class UserService {
   private userRepository: UserRepository;
@@ -12,6 +11,19 @@ export class UserService {
     this.userRepository = new UserRepository();
   }
 
+  async getAllUsers(options: PaginationOptions): Promise<PaginatedResponse<UserResponseDto>> {
+    const [users, total] = await this.userRepository.findAllUsers(options);
+    const userDtos = users.map(
+      (user) =>
+        new UserResponseDto({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          created_at: user.created_at,
+          updated_at: user.updated_at
+        })
+    );
+    return createPaginatedResponse(userDtos, total, options);
   }
 
   async getUserById(id: number): Promise<UserResponseDto> {
