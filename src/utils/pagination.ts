@@ -18,7 +18,7 @@ export interface PaginatedResponse<T> {
 
 export const getPaginationOptions = (req: Request): PaginationOptions => {
   const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
+  const limit = parseInt(req.query.limit as string) || 100;
   const skip = (page - 1) * limit;
 
   return {

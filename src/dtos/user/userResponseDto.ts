@@ -1,9 +1,16 @@
 export class UserResponseDto {
   id: number;
   name: string;
-  email: string;
-  created_at: Date;
-  updated_at: Date;
+  email?: string;
+  books?: {
+    past: Array<{
+      name: string;
+      userScore: number;
+    }>;
+    present: Array<{
+      name: string;
+    }>;
+  };
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);

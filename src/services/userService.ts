@@ -1,8 +1,10 @@
 import { UserRepository } from '../repositories/userRepository';
 import { PaginationOptions, PaginatedResponse, createPaginatedResponse } from '../utils/pagination';
-import { NotFoundError, ConflictError } from '../utils/errors';
+import { ConflictError, NotFoundError } from '../utils/errors';
 import { CreateUserDto } from '../dtos/user/createUserDto';
 import { UserResponseDto } from '../dtos/user/userResponseDto';
+import DatabaseConnection from '../config/database';
+import { UpdateUserDto } from '../dtos/user/updateUserDto';
 
 export class UserService {
   private userRepository: UserRepository;
@@ -11,19 +13,13 @@ export class UserService {
     this.userRepository = new UserRepository();
   }
 
-  async getAllUsers(options: PaginationOptions): Promise<PaginatedResponse<UserResponseDto>> {
-    const [users, total] = await this.userRepository.findAllUsers(options);
-    const userDtos = users.map(
-      (user) =>
-        new UserResponseDto({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          created_at: user.created_at,
-          updated_at: user.updated_at
-        })
-    );
-    return createPaginatedResponse(userDtos, total, options);
+  async getAllUsers(options: PaginationOptions): Promise<UserResponseDto[]> {
+    const [users, _] = await this.userRepository.findAllUsers(options);
+
+    return users.map((user) => ({
+      id: user.id,
+      name: user.name
+    }));
   }
 
   async getUserById(id: number): Promise<UserResponseDto> {
@@ -32,36 +28,71 @@ export class UserService {
       throw new NotFoundError(`User with ID: ${id} not found`);
     }
 
-    return new UserResponseDto({
+    const borrowings = await this.userRepository.getUserBorrowings(id);
+
+    const pastBorrowings = borrowings
+      .filter((b) => b.returnDate !== null)
+      .map((b) => ({
+        name: b.book.name,
+        userScore: b.score
+      }));
+
+    const presentBorrowings = borrowings
+      .filter((b) => b.returnDate === null)
+      .map((b) => ({
+        name: b.book.name
+      }));
+
+    return {
       id: user.id,
       name: user.name,
-      email: user.email,
-      created_at: user.created_at,
-      updated_at: user.updated_at
-    });
+      books: {
+        past: pastBorrowings,
+        present: presentBorrowings
+      }
+    };
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<UserResponseDto> {
-    if (createUserDto?.email) {
-      const existingUser = await this.userRepository.findUserByEmail(createUserDto.email);
-      if (existingUser) {
-        throw new ConflictError(`Email address ${createUserDto.email} is already in use`);
+  async createUser(createUserDto: CreateUserDto): Promise<void> {
+    const user = this.userRepository.create({
+      name: createUserDto.name
+    });
+
+    await this.userRepository.save(user);
+
+    return; // return empty response according to postman collection
+  }
+
+  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<void> {
+    // Check if user exists
+    const existingUser = await this.userRepository.findUserById(id);
+    if (!existingUser) {
+      throw new NotFoundError(`User with ID: ${id} not found`);
+    }
+
+    // Check if email is already in use by another user
+    if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
+      const userWithSameEmail = await this.userRepository.findUserByEmail(updateUserDto.email);
+      if (userWithSameEmail && userWithSameEmail.id !== id) {
+        throw new ConflictError(`Email address ${updateUserDto.email} is already in use`);
       }
     }
 
-    const user = this.userRepository.create({
-      name: createUserDto.name,
-      email: createUserDto?.email
-    });
+    await this.userRepository.update(id, updateUserDto);
 
-    const savedUser = await this.userRepository.save(user);
+    return;
+  }
 
-    return new UserResponseDto({
-      id: savedUser.id,
-      name: savedUser.name,
-      email: savedUser.email,
-      created_at: savedUser.created_at,
-      updated_at: savedUser.updated_at
-    });
+  async deleteUser(id: number): Promise<void> {
+    const existingUser = await this.userRepository.findUserById(id);
+    if (!existingUser) {
+      throw new NotFoundError(`User with ID: ${id} not found`);
+    }
+
+    const deleted = await this.userRepository.delete(id);
+    if (!deleted) {
+      throw new Error(`Failed to delete user with ID: ${id}`);
+    }
+    return;
   }
 }
