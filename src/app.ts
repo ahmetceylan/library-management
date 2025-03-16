@@ -13,6 +13,7 @@ import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger';
+import { requestLoggerMiddleware } from './middlewares/requestLoggerMiddleware';
 
 dotenv.config({ path: path.join(__dirname, './../.env') });
 
@@ -22,6 +23,9 @@ DatabaseConnection.getInstance()
 
 Logger.init();
 const app = express();
+
+// Add request logger middleware before other middlewares
+app.use(requestLoggerMiddleware);
 
 // Middlewares
 // Rate Limiter
