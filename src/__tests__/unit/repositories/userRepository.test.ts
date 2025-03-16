@@ -3,11 +3,10 @@ import { User } from '../../../entities/User';
 import { Repository } from 'typeorm';
 import DatabaseConnection from '../../../config/database';
 
-// Mock DatabaseConnection
 jest.mock('../../../config/database', () => ({
   getInstance: jest.fn()
 }));
-// Entity mocks
+
 jest.mock('../../../entities/Book', () => ({
   Book: class Book {
     id: number;
@@ -15,7 +14,6 @@ jest.mock('../../../entities/Book', () => ({
   }
 }));
 
-// Diğer entity'leri de mock'la
 jest.mock('../../../entities/User', () => ({
   User: class User {
     id: number;
@@ -39,10 +37,8 @@ describe('UserRepository', () => {
   let mockTypeormRepository: jest.Mocked<Repository<User>>;
 
   beforeEach(() => {
-    // Clear all mocks
     jest.clearAllMocks();
 
-    // Create mock for TypeORM Repository
     mockTypeormRepository = {
       findAndCount: jest.fn(),
       findOne: jest.fn(),
@@ -53,15 +49,28 @@ describe('UserRepository', () => {
       createQueryBuilder: jest.fn()
     } as unknown as jest.Mocked<Repository<User>>;
 
-    // Mock DatabaseConnection.getInstance().getRepository
     (DatabaseConnection.getInstance as jest.Mock).mockReturnValue({
       getRepository: jest.fn().mockReturnValue(mockTypeormRepository)
     });
 
-    // Create UserRepository instance
     userRepository = new UserRepository();
   });
 
+  describe('findUserById', () => {
+    it('should call repository findOne with correct parameters', async () => {
+      const userId = 1;
+      const expectedUser = { id: userId, name: 'User 1' } as unknown as User;
+      mockTypeormRepository.findOne.mockResolvedValue(expectedUser);
+
+      const result = await userRepository.findUserById(userId);
+
+      expect(mockTypeormRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+        relations: ['borrowings', 'borrowings.book']
+      });
+      expect(result).toEqual(expectedUser);
+    });
+  });
   describe('findAllUsers', () => {
     it('should call repository findAndCount with correct parameters', async () => {
       // Arrange
@@ -69,10 +78,8 @@ describe('UserRepository', () => {
       const expectedUsers = [{ id: 1, name: 'User 1' }] as unknown as User[];
       mockTypeormRepository.findAndCount.mockResolvedValue([expectedUsers, 1]);
 
-      // Act
       const result = await userRepository.findAllUsers(paginationOptions);
 
-      // Assert
       expect(mockTypeormRepository.findAndCount).toHaveBeenCalledWith({
         skip: 0,
         take: 10,
@@ -82,28 +89,19 @@ describe('UserRepository', () => {
     });
   });
 
-  describe('findUserById', () => {
-    it('should call repository findOne with correct parameters', async () => {
-      // Arrange
-      const userId = 1;
-      const expectedUser = { id: userId, name: 'User 1' } as unknown as User;
-      mockTypeormRepository.findOne.mockResolvedValue(expectedUser);
+  describe('save', () => {
+    it('should call repository save with correct parameters', async () => {
+      const user = { id: 1, name: 'User 1' } as User;
+      mockTypeormRepository.save.mockResolvedValue(user);
 
-      // Act
-      const result = await userRepository.findUserById(userId);
+      const result = await userRepository.save(user);
 
-      // Assert
-      expect(mockTypeormRepository.findOne).toHaveBeenCalledWith({
-        where: { id: userId },
-        relations: ['borrowings', 'borrowings.book']
-      });
-      expect(result).toEqual(expectedUser);
+      expect(mockTypeormRepository.save).toHaveBeenCalledWith(user);
+      expect(result).toEqual(user);
     });
   });
-
   describe('create', () => {
     it('should call repository create with correct parameters', () => {
-      // Arrange
       const userData = { name: 'New User' };
       const expectedUser = { id: 1, name: 'New User' };
       mockTypeormRepository.create.mockReturnValue(expectedUser as User);
@@ -117,24 +115,21 @@ describe('UserRepository', () => {
     });
   });
 
-  describe('save', () => {
-    it('should call repository save with correct parameters', async () => {
-      // Arrange
-      const user = { id: 1, name: 'User 1' } as User;
-      mockTypeormRepository.save.mockResolvedValue(user);
-
-      // Act
-      const result = await userRepository.save(user);
-
-      // Assert
-      expect(mockTypeormRepository.save).toHaveBeenCalledWith(user);
-      expect(result).toEqual(user);
-    });
-  });
-
   describe('getUserBorrowings', () => {
+    it('should return empty array when user has no borrowings', async () => {
+      const userId = 1;
+      const mockQueryBuilder = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(null)
+      };
+      mockTypeormRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      const result = await userRepository.getUserBorrowings(userId);
+
+      expect(result).toEqual([]);
+    });
     it('should return user borrowings', async () => {
-      // Arrange
       const userId = 1;
       const mockQueryBuilder = {
         leftJoinAndSelect: jest.fn().mockReturnThis(),
@@ -150,32 +145,13 @@ describe('UserRepository', () => {
       };
       mockTypeormRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
-      // Act
       const result = await userRepository.getUserBorrowings(userId);
 
-      // Assert
       expect(mockTypeormRepository.createQueryBuilder).toHaveBeenCalledWith('user');
       expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('user.borrowings', 'borrowing');
       expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('borrowing.book', 'book');
       expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.id = :userId', { userId });
       expect(result).toHaveLength(2);
-    });
-
-    it('should return empty array when user has no borrowings', async () => {
-      // Arrange
-      const userId = 1;
-      const mockQueryBuilder = {
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(null)
-      };
-      mockTypeormRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
-
-      // Act
-      const result = await userRepository.getUserBorrowings(userId);
-
-      // Assert
-      expect(result).toEqual([]);
     });
   });
 });

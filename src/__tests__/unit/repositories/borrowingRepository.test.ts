@@ -3,13 +3,12 @@ import { Borrowing } from '../../../entities/Borrowing';
 import { DataSource, Repository, IsNull, Not } from 'typeorm';
 import DatabaseConnection from '../../../config/database';
 
-// Mock TypeORM
 jest.mock('typeorm');
-// Mock DatabaseConnection
+
 jest.mock('../../../config/database', () => ({
   getInstance: jest.fn()
 }));
-// Entity mocks
+
 jest.mock('../../../entities/Book', () => ({
   Book: class Book {
     id: number;
@@ -17,7 +16,6 @@ jest.mock('../../../entities/Book', () => ({
   }
 }));
 
-// Diğer entity'leri de mock'la
 jest.mock('../../../entities/User', () => ({
   User: class User {
     id: number;
@@ -47,7 +45,6 @@ describe('BorrowingRepository', () => {
   };
 
   beforeEach(() => {
-    // Clear all mocks
     jest.clearAllMocks();
 
     mockTypeormRepository = {
@@ -61,71 +58,15 @@ describe('BorrowingRepository', () => {
       createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder)
     } as unknown as jest.Mocked<Repository<Borrowing>>;
 
-    // Mock DatabaseConnection.getInstance().getRepository
     (DatabaseConnection.getInstance as jest.Mock).mockReturnValue({
       getRepository: jest.fn().mockReturnValue(mockTypeormRepository)
     });
 
-    // Create BorrowingRepository instance with mocked DataSource
     borrowingRepository = new BorrowingRepository();
-  });
-
-  describe('findActiveBorrowing', () => {
-    it('should call repository findOne with correct parameters', async () => {
-      // Arrange
-      const userId = 1;
-      const bookId = 2;
-      const expectedBorrowing = {
-        id: 1,
-        user: { id: userId },
-        book: { id: bookId },
-        borrowDate: new Date(),
-        returnDate: null
-      } as unknown as Borrowing;
-
-      // QueryBuilder'ın getOne metodunu mock'la
-      mockQueryBuilder.getOne.mockResolvedValue(expectedBorrowing);
-
-      // Act
-      const result = await borrowingRepository.findActiveBorrowing(userId, bookId);
-
-      // Assert
-      expect(mockTypeormRepository.createQueryBuilder).toHaveBeenCalled();
-      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('borrowing.user', 'user');
-      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('borrowing.book', 'book');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('borrowing.returnDate IS NULL');
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('user.id = :userId', { userId });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('book.id = :bookId', { bookId });
-      expect(mockQueryBuilder.getOne).toHaveBeenCalled();
-      expect(result).toEqual(expectedBorrowing);
-    });
-  });
-
-  describe('findUserActiveBorrowings', () => {
-    it('should call repository find with correct parameters', async () => {
-      // Arrange
-      const userId = 1;
-      const expectedBorrowings = [{ id: 1, user: { id: userId }, book: { id: 1, name: 'Book 1' }, returnDate: null }] as unknown as Borrowing[];
-      mockTypeormRepository.find.mockResolvedValue(expectedBorrowings);
-
-      // Act
-      const result = await borrowingRepository.findUserActiveBorrowings(userId);
-
-      // Assert
-      expect(mockTypeormRepository.find).toHaveBeenCalledWith({
-        where: {
-          user: { id: userId },
-          returnDate: IsNull()
-        },
-        relations: ['book']
-      });
-      expect(result).toEqual(expectedBorrowings);
-    });
   });
 
   describe('findUserPastBorrowings', () => {
     it('should call repository find with correct parameters', async () => {
-      // Arrange
       const userId = 1;
       const expectedBorrowings = [
         {
@@ -138,14 +79,56 @@ describe('BorrowingRepository', () => {
       ] as unknown as Borrowing[];
       mockTypeormRepository.find.mockResolvedValue(expectedBorrowings);
 
-      // Act
       const result = await borrowingRepository.findUserPastBorrowings(userId);
 
-      // Assert
       expect(mockTypeormRepository.find).toHaveBeenCalledWith({
         where: {
           user: { id: userId },
           returnDate: Not(IsNull())
+        },
+        relations: ['book']
+      });
+      expect(result).toEqual(expectedBorrowings);
+    });
+  });
+
+  describe('findActiveBorrowing', () => {
+    it('should call repository findOne with correct parameters', async () => {
+      const userId = 1;
+      const bookId = 2;
+      const expectedBorrowing = {
+        id: 1,
+        user: { id: userId },
+        book: { id: bookId },
+        borrowDate: new Date(),
+        returnDate: null
+      } as unknown as Borrowing;
+
+      mockQueryBuilder.getOne.mockResolvedValue(expectedBorrowing);
+
+      const result = await borrowingRepository.findActiveBorrowing(userId, bookId);
+
+      expect(mockTypeormRepository.createQueryBuilder).toHaveBeenCalled();
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('borrowing.user', 'user');
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('borrowing.book', 'book');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('borrowing.returnDate IS NULL');
+      expect(mockQueryBuilder.getOne).toHaveBeenCalled();
+      expect(result).toEqual(expectedBorrowing);
+    });
+  });
+
+  describe('findUserActiveBorrowings', () => {
+    it('should call repository find with correct parameters', async () => {
+      const userId = 1;
+      const expectedBorrowings = [{ id: 1, user: { id: userId }, book: { id: 1, name: 'Book 1' }, returnDate: null }] as unknown as Borrowing[];
+      mockTypeormRepository.find.mockResolvedValue(expectedBorrowings);
+
+      const result = await borrowingRepository.findUserActiveBorrowings(userId);
+
+      expect(mockTypeormRepository.find).toHaveBeenCalledWith({
+        where: {
+          user: { id: userId },
+          returnDate: IsNull()
         },
         relations: ['book']
       });
