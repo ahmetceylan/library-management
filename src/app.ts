@@ -47,7 +47,6 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 app.use(routes);
 
-// Swagger dokümantasyonunu ekle
 app.use(
   '/api-docs',
   swaggerUi.serve,

@@ -59,7 +59,7 @@ export class UserService {
 
     await this.userRepository.save(user);
 
-    return; // return empty response according to postman collection
+    return;
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<void> {

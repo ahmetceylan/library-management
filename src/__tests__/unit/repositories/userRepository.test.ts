@@ -73,7 +73,6 @@ describe('UserRepository', () => {
   });
   describe('findAllUsers', () => {
     it('should call repository findAndCount with correct parameters', async () => {
-      // Arrange
       const paginationOptions = { page: 1, limit: 10, skip: 0 };
       const expectedUsers = [{ id: 1, name: 'User 1' }] as unknown as User[];
       mockTypeormRepository.findAndCount.mockResolvedValue([expectedUsers, 1]);
@@ -106,10 +105,8 @@ describe('UserRepository', () => {
       const expectedUser = { id: 1, name: 'New User' };
       mockTypeormRepository.create.mockReturnValue(expectedUser as User);
 
-      // Act
       const result = userRepository.create(userData);
 
-      // Assert
       expect(mockTypeormRepository.create).toHaveBeenCalledWith(userData);
       expect(result).toEqual(expectedUser);
     });

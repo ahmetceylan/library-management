@@ -8,15 +8,12 @@ jest.mock('typeorm');
 jest.mock('../../../config/database', () => ({
   getInstance: jest.fn()
 }));
-// Entity mocks
 jest.mock('../../../entities/Book', () => ({
   Book: class Book {
     id: number;
     name: string;
   }
 }));
-
-// Diğer entity'leri de mock'la
 jest.mock('../../../entities/User', () => ({
   User: class User {
     id: number;

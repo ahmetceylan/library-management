@@ -16,7 +16,7 @@ export default class Logger {
         })
       );
     }
-    // enable below line to write into a file
+
     winston.add(logger);
   };
 }

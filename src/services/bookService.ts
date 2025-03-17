@@ -44,7 +44,6 @@ export class BookService {
 
     await this.bookRepository.save(book);
 
-    // Postman Collection'a göre boş yanıt dönüyoruz (201 status code)
     return;
   }
 
