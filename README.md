@@ -76,6 +76,34 @@ If you prefer to use Docker directly without Docker Compose, you can follow thes
 
 This will start the application in a Docker container, making it easier to manage dependencies and environment configurations.
 
+## Database Migrations
+
+The application uses TypeORM for database migrations. Migrations are used to manage changes to the database schema over time. You can create new migrations and run them using the following commands:
+
+- **Generate a new migration**:
+  ```bash
+  npm run migration:generate -- -n MigrationName
+  ```
+  This command will create a new migration file in the `migrations` directory.
+
+- **Run pending migrations**:
+  ```bash
+  npm run migration:run
+  ```
+  This command will execute all pending migrations to update the database schema.
+
+- **Revert the last migration**:
+  ```bash
+  npm run migration:revert
+  ```
+  This command will undo the last executed migration.
+
+- **Show migration status**:
+  ```bash
+  npm run migration:show
+  ```
+  This command will display the status of all migrations.
+
 
 ## API Documentation
 
