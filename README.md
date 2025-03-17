@@ -79,7 +79,7 @@ This will start the application in a Docker container, making it easier to manag
 
 ## API Documentation
 
-The API is documented using Swagger. Once the application is running, you can access the documentation at: `http://localhost:3000/api-docs`
+The API is documented using Swagger. Once the application is running, you can access the documentation at: http://localhost:3000/api-docs
 
 You can also use the postman collection in root folder
 
