@@ -85,8 +85,6 @@ You can also use the postman collection in root folder
 
 ## Concurrency and Race Condition Handling
 
-In English:
-
 Due to the uncertainty about whether concurrency/race condition mechanisms are necessary, optimistic locking/transaction support was not added. One reason for this was to avoid over-engineering due to the ambiguity. If transaction support is to be implemented, it would be appropriate to add it to the borrowing endpoints, as conflicts may occur when multiple users perform operations simultaneously, such as borrowing books or updating the availability of books. You can find a similar implementation for using transaction; 
 
 Btw, to implement optimistic locking, it is necessary to add a version field to the db entity.
